@@ -1,0 +1,11 @@
+# Node / frontend artifacts
+frontend/node_modules
+frontend/dist
+
+# Python
+__pycache__/
+*.pyc
+.venv
+
+# Environment
+.DS_Store
