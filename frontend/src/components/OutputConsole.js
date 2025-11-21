@@ -1,0 +1,5 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+export function OutputConsole({ stdout, stderr }) {
+    const hasOutput = stdout.trim().length > 0 || stderr.trim().length > 0;
+    return (_jsxs("div", { className: "glass-panel rounded-xl p-4 h-60 overflow-auto console-output text-sm", children: [_jsxs("div", { className: "flex items-center justify-between mb-3", children: [_jsx("p", { className: "font-semibold text-slate-900 dark:text-slate-200", children: "Output Console" }), !hasOutput && _jsx("span", { className: "text-xs text-slate-500 dark:text-slate-400", children: "Waiting for execution\u2026" })] }), stdout && (_jsx("pre", { className: "text-emerald-600 dark:text-emerald-200 whitespace-pre-wrap mb-2", children: stdout || "No stdout" })), stderr && (_jsx("pre", { className: "text-rose-600 dark:text-rose-300 whitespace-pre-wrap", children: stderr || "No stderr" })), !hasOutput && _jsx("p", { className: "text-slate-500 dark:text-slate-400", children: "Run your code to see results here." })] }));
+}
