@@ -40,6 +40,9 @@ def _load_execution_timeout() -> float:
 EXECUTION_TIMEOUT = _load_execution_timeout()
 logger = logging.getLogger(__name__)
 _GPU_TRACKING_ENABLED = True
+COUNTRY_CODE = os.getenv("CODECARBON_COUNTRY", "IND").strip().upper() or "IND"
+# Human-friendly label; falls back to ISO code if none provided
+COUNTRY_LABEL = os.getenv("CODECARBON_COUNTRY_NAME", COUNTRY_CODE)
 
 app = FastAPI(title="CodeCarbon Runner", version="1.0.0")
 app.add_middleware(
@@ -111,9 +114,9 @@ def _create_tracker() -> EmissionsTracker:
         "save_to_file": False,
     }
     if "country_iso_code" in inspect.signature(EmissionsTracker).parameters:
-        tracker_kwargs["country_iso_code"] = "IND"
+        tracker_kwargs["country_iso_code"] = COUNTRY_CODE
     else:
-        os.environ.setdefault("CODECARBON_COUNTRY", "IND")
+        os.environ.setdefault("CODECARBON_COUNTRY", COUNTRY_CODE)
     _ensure_gpu_tracking_state()
     try:
         return EmissionsTracker(**tracker_kwargs)
@@ -155,7 +158,7 @@ def _collect_tracker_metrics(tracker: EmissionsTracker) -> Dict[str, Any]:
     metrics["gpu_energy"] = float(getattr(data, "gpu_energy", 0.0))
     metrics["duration"] = float(getattr(data, "duration", 0.0))
     metrics["carbon_intensity"] = getattr(data, "carbon_intensity", None)
-    metrics["country"] = getattr(data, "country_name", None)
+    metrics["country"] = COUNTRY_LABEL or getattr(data, "country_name", None) or COUNTRY_CODE
     return metrics
 
 
