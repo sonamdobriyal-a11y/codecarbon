@@ -83,6 +83,7 @@ classes = {
 doc = "tech markets rally on new AI chips".split()
 vocab = {"sports":0,"tech":1,"ai":2,"chips":3,"finance":4}
 vec = [0]*5
+
 for token, count in Counter(doc).items():
     if token in vocab:
         vec[vocab[token]] = count
@@ -225,6 +226,9 @@ export default function App() {
     theme === "dark"
       ? "bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950"
       : "bg-gradient-to-br from-slate-100 via-white to-slate-50";
+  const metricsPanelClasses = showMetrics
+    ? "opacity-100 translate-y-0 md:translate-x-0"
+    : "opacity-0 pointer-events-none -translate-y-2 md:translate-x-[110%]";
 
   return (
     <div className={`min-h-screen ${backgroundClass} transition-colors duration-300 ${theme === "dark" ? "text-slate-100" : "text-slate-900"}`}>
@@ -315,11 +319,9 @@ export default function App() {
         <OutputConsole stdout={result?.stdout ?? ""} stderr={result?.stderr ?? ""} />
 
         <aside
-          className={`fixed right-4 top-28 bottom-6 z-30 w-full max-w-sm transition-transform duration-300 ease-out md:right-10 md:top-24 ${
-            showMetrics ? "translate-x-0" : "translate-x-[110%]"
-          }`}
+          className={`relative w-full transition-all duration-300 ease-out ${metricsPanelClasses} md:fixed md:right-4 md:top-28 md:bottom-6 md:z-30 md:max-w-sm md:right-10 md:top-24`}
         >
-          <div className="glass-panel rounded-2xl border border-slate-200/70 bg-white/80 p-4 shadow-2xl backdrop-blur dark:border-slate-700/70 dark:bg-slate-900/80">
+          <div className="glass-panel rounded-2xl border border-slate-200/70 bg-white/80 p-4 shadow-2xl backdrop-blur dark:border-slate-700/70 dark:bg-slate-900/80 max-h-[70vh] overflow-y-auto md:h-full md:max-h-[calc(100vh-8rem)]">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs uppercase tracking-widest text-cyan-500 dark:text-cyan-300">Energy & Emissions</p>
