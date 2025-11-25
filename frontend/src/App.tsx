@@ -143,7 +143,6 @@ export default function App() {
   const [result, setResult] = useState<RunResponse | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showMetrics, setShowMetrics] = useState(false);
   const [template, setTemplate] = useState(TEMPLATE_OPTIONS[0].value);
 
   useEffect(() => {
@@ -197,12 +196,10 @@ export default function App() {
     }
     setIsRunning(true);
     setResult(null); // clear previous run data immediately
-    setShowMetrics(false);
     setError(null);
     try {
       const data = await executeCode({ code });
       setResult(data);
-      setShowMetrics(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Execution failed.");
     } finally {
@@ -217,7 +214,6 @@ export default function App() {
       setCode(selected.code);
       setResult(null);
       setError(null);
-      setShowMetrics(false);
     }
   };
 
@@ -226,9 +222,6 @@ export default function App() {
     theme === "dark"
       ? "bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950"
       : "bg-gradient-to-br from-slate-100 via-white to-slate-50";
-  const metricsPanelClasses = showMetrics
-    ? "opacity-100 translate-y-0 md:translate-x-0"
-    : "opacity-0 pointer-events-none -translate-y-2 md:translate-x-[110%]";
 
   return (
     <div className={`min-h-screen ${backgroundClass} transition-colors duration-300 ${theme === "dark" ? "text-slate-100" : "text-slate-900"}`}>
@@ -252,96 +245,83 @@ export default function App() {
         </div>
       </header>
 
-      <main className="relative max-w-6xl mx-auto px-6 pb-12 flex flex-col gap-6 md:pr-[360px]">
-        <section className="glass-panel rounded-2xl p-4 flex flex-col gap-4">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-3">
-              <label className="text-sm text-slate-600 dark:text-slate-300">Language</label>
-              <select
-                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                value={language}
-                onChange={(event) => setLanguage(event.target.value)}
+      <main className="relative max-w-6xl mx-auto px-6 pb-12 flex flex-col gap-6">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] items-start">
+          <section className="glass-panel rounded-2xl p-4 flex flex-col gap-4">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex items-center gap-3">
+                <label className="text-sm text-slate-600 dark:text-slate-300">Language</label>
+                <select
+                  className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                  value={language}
+                  onChange={(event) => setLanguage(event.target.value)}
+                >
+                  {LANGUAGE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <label className="text-sm text-slate-600 dark:text-slate-300">Template</label>
+                <select
+                  className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                  value={template}
+                  onChange={(event) => handleTemplateChange(event.target.value)}
+                >
+                  {TEMPLATE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleRun}
+                disabled={isRunning}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-2 font-semibold text-white shadow-lg transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {LANGUAGE_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+                {isRunning ? "Running..." : "Run Code"}
+              </button>
             </div>
 
-            <div className="flex items-center gap-3">
-              <label className="text-sm text-slate-600 dark:text-slate-300">Template</label>
-              <select
-                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                value={template}
-                onChange={(event) => handleTemplateChange(event.target.value)}
-              >
-                {TEMPLATE_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+            <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
+              <Editor
+                height="420px"
+                language={language}
+                theme="vs-dark"
+                value={code}
+                onChange={(value) => setCode(value ?? "")}
+                options={{
+                  minimap: { enabled: false },
+                  fontSize: 14,
+                  automaticLayout: true,
+                  scrollBeyondLastLine: false
+                }}
+              />
             </div>
+            {error && (
+              <p className="rounded-lg bg-rose-500/10 px-4 py-2 text-sm text-rose-700 dark:text-rose-200">
+                {error}
+              </p>
+            )}
+          </section>
 
-            <button
-              type="button"
-              onClick={handleRun}
-              disabled={isRunning}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-2 font-semibold text-white shadow-lg transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {isRunning ? "Running…" : "Run Code"}
-            </button>
-          </div>
-          <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
-            <Editor
-              height="420px"
-              language={language}
-              theme="vs-dark"
-              value={code}
-              onChange={(value) => setCode(value ?? "")}
-              options={{
-                minimap: { enabled: false },
-                fontSize: 14,
-                automaticLayout: true,
-                scrollBeyondLastLine: false
-              }}
-            />
-          </div>
-          {error && (
-            <p className="rounded-lg bg-rose-500/10 px-4 py-2 text-sm text-rose-700 dark:text-rose-200">
-              {error}
-            </p>
-          )}
-        </section>
-
-        <OutputConsole stdout={result?.stdout ?? ""} stderr={result?.stderr ?? ""} />
-
-        <aside
-          className={`relative w-full transition-all duration-300 ease-out ${metricsPanelClasses} md:fixed md:right-4 md:top-28 md:bottom-6 md:z-30 md:max-w-sm md:right-10 md:top-24`}
-        >
-          <div className="glass-panel rounded-2xl border border-slate-200/70 bg-white/80 p-4 shadow-2xl backdrop-blur dark:border-slate-700/70 dark:bg-slate-900/80 max-h-[70vh] overflow-y-auto md:h-full md:max-h-[calc(100vh-8rem)]">
-            <div className="flex items-center justify-between">
+          <aside className="glass-panel rounded-2xl border border-slate-200/70 bg-white/80 p-4 shadow-2xl backdrop-blur dark:border-slate-700/70 dark:bg-slate-900/80 lg:sticky lg:top-24">
+            <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-xs uppercase tracking-widest text-cyan-500 dark:text-cyan-300">Energy & Emissions</p>
                 <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Live metrics</h2>
               </div>
-              <div className="flex items-center gap-3">
-                {result?.country && (
-                  <span className="text-xs uppercase tracking-widest text-slate-500 dark:text-slate-400">
-                    {result.country}
-                  </span>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setShowMetrics(false)}
-                  className="rounded-full border border-slate-300 px-2 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-                  aria-label="Close metrics panel"
-                >
-                  Close
-                </button>
-              </div>
+              {result?.country && (
+                <span className="text-xs uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                  {result.country}
+                </span>
+              )}
             </div>
             {metrics ? (
               <div className="mt-4 grid grid-cols-1 gap-3">
@@ -352,8 +332,9 @@ export default function App() {
             ) : (
               <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">Run code to see live measurements.</p>
             )}
-          </div>
-        </aside>
+          </aside>
+        </div>
+        <OutputConsole stdout={result?.stdout ?? ""} stderr={result?.stderr ?? ""} />
       </main>
     </div>
   );
