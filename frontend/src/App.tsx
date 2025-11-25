@@ -20,6 +20,7 @@ for i in range(50_000):
 
 print("Result:", total)
 `;
+
 const TEMPLATE_OPTIONS = [
   {
     label: "Custom",
@@ -177,14 +178,6 @@ export default function App() {
       {
         label: "CPU Energy",
         value: `${formatNumber(result.cpu_energy, 6)} kWh`
-      },
-      {
-        label: "GPU Energy",
-        value: `${formatNumber(result.gpu_energy, 6)} kWh`
-      },
-      {
-        label: "Carbon Intensity",
-        value: result.carbon_intensity ? `${result.carbon_intensity} gCO₂/kWh` : "N/A"
       }
     ];
   }, [result]);
@@ -195,7 +188,7 @@ export default function App() {
       return;
     }
     setIsRunning(true);
-    setResult(null); // clear previous run data immediately
+    setResult(null);
     setError(null);
     try {
       const data = await executeCode({ code });
@@ -224,7 +217,11 @@ export default function App() {
       : "bg-gradient-to-br from-slate-100 via-white to-slate-50";
 
   return (
-    <div className={`min-h-screen ${backgroundClass} transition-colors duration-300 ${theme === "dark" ? "text-slate-100" : "text-slate-900"}`}>
+    <div
+      className={`min-h-screen ${backgroundClass} transition-colors duration-300 ${
+        theme === "dark" ? "text-slate-100" : "text-slate-900"
+      }`}
+    >
       <header className="px-6 py-6">
         <div className="max-w-6xl mx-auto flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>

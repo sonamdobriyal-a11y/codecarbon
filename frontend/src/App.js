@@ -170,14 +170,6 @@ export default function App() {
             {
                 label: "CPU Energy",
                 value: `${formatNumber(result.cpu_energy, 6)} kWh`
-            },
-            {
-                label: "GPU Energy",
-                value: `${formatNumber(result.gpu_energy, 6)} kWh`
-            },
-            {
-                label: "Carbon Intensity",
-                value: result.carbon_intensity ? `${result.carbon_intensity} gCO₂/kWh` : "N/A"
             }
         ];
     }, [result]);
@@ -187,7 +179,7 @@ export default function App() {
             return;
         }
         setIsRunning(true);
-        setResult(null); // clear previous run data immediately
+        setResult(null);
         setError(null);
         try {
             const data = await executeCode({ code });
